@@ -33,7 +33,7 @@ Xvfb :99 -screen 0 1280x720x24 > /dev/null 2>&1 &\n\
 sleep 3\n\
 echo "Starting TwitchDropsMiner..."\n\
 touch log.log\n\
-tail -f log.txt &\n\
+tail -n 0 -f log.txt &\n\
 cd /app && ./env/bin/python3 main.py --log ${ARGS:-"-vv"}' > /start.sh && \
     chmod +x /start.sh
 
