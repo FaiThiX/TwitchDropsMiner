@@ -2,7 +2,7 @@ name: Create and publish Docker Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * 0'
@@ -22,14 +22,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Login bei der Container Registry
+      - name: Login to Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker Metadaten extrahieren
+      - name: Extract Docker Metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -38,7 +38,7 @@ jobs:
             type=raw,value=latest
             type=sha
 
-      - name: Bauen und Pushen
+      - name: Build and Publish
         uses: docker/build-push-action@v5
         with:
           context: .
