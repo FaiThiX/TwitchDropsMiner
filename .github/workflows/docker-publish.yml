@@ -1,18 +1,14 @@
-name: Docker Image erstellen und veröffentlichen
+name: Create and publish Docker Image
 
-# Wann soll das passieren?
 on:
   push:
     branches: [ "main" ]
-  # Erlaubt manuelles Starten im "Actions" Tab
   workflow_dispatch:
-  # Optional: Einmal pro Woche automatisch bauen, um Updates vom Miner-Repo zu holen
   schedule:
-    - cron: '0 0 * * 0' # Jeden Sonntag um Mitternacht
+    - cron: '0 0 * * 0'
 
 env:
   REGISTRY: ghcr.io
-  # Der Name des Images wird automatisch aus deinem Repo-Namen generiert
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -46,7 +42,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          # Wichtig: Hier wird dein Dockerfile genutzt
           file: Dockerfile 
           push: true
           tags: ${{ steps.meta.outputs.tags }}
