@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   twitch-drops-miner:
-    image: ghcr.io/FaiThiX/TwitchDropsMiner:latest
+    image: ghcr.io/faithix/twitchdropsminer:latest
     
     container_name: twitch-drops-miner
     restart: unless-stopped
