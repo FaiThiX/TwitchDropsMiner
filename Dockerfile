@@ -32,7 +32,7 @@ echo "Starting virtual display (Xvfb)..."\n\
 Xvfb :99 -screen 0 1280x720x24 > /dev/null 2>&1 &\n\
 sleep 3\n\
 echo "Starting TwitchDropsMiner..."\n\
-cd /app && ./env/bin/python3 main.py' > /start.sh && \
+cd /app && ./env/bin/python3 main.py ${ARGS:-"-vv"}' > /start.sh && \
     chmod +x /start.sh
 
 CMD ["/start.sh"]
