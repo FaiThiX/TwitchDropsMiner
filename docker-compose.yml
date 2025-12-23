@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  twitch-drops-miner:
+    image: ghcr.io/FaiThiX/TwitchDropsMiner:latest
+    
+    container_name: twitch-drops-miner
+    restart: unless-stopped
+    volumes:
+      - ./cookies.jar:/app/cookies.jar
+      - ./settings.json:/app/settings.json
+    shm_size: 2gb
