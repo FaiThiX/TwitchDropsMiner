@@ -3,7 +3,9 @@ version: '3.8'
 services:
   twitch-drops-miner:
     image: ghcr.io/faithix/twitchdropsminer:latest
-    
+    # Optional: Enable for more logging
+  #  environment:
+  #    - ARGS=-vvv --log
     container_name: twitch-drops-miner
     restart: unless-stopped
     volumes:
