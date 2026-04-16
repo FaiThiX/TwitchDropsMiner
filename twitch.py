@@ -845,7 +845,7 @@ class Twitch:
                     # NOTE: we need to sort the channels every time because one channel
                     # can end up streaming any game - channels aren't game-tied
                     for channel in sorted(channels.values(), key=self.get_priority):
-                        if self.can_watch(channel) and self.should_switch(channel):
+                        if self.should_switch(channel):
                             new_watching = channel
                             break
                 watching_channel = self.watching_channel.get_with_default(None)
@@ -1003,8 +1003,10 @@ class Twitch:
         """
         Determines if the given channel qualifies as a switch candidate.
         """
+        if not self.can_watch(channel):
+            return False
         watching_channel = self.watching_channel.get_with_default(None)
-        if watching_channel is None:
+        if watching_channel is None or not self.can_watch(watching_channel):
             return True
         channel_order = self.get_priority(channel)
         watching_order = self.get_priority(watching_channel)
@@ -1099,7 +1101,7 @@ class Twitch:
         if stream_before is None:
             if stream_after is not None:
                 # Channel going ONLINE
-                if self.can_watch(channel) and self.should_switch(channel):
+                if self.should_switch(channel):
                     # we can watch the channel, and we should
                     self.print(_("status", "goes_online").format(channel=channel.name))
                     self.watch(channel)
@@ -1139,8 +1141,8 @@ class Twitch:
                     f"(🎁: {stream_before.drops_enabled and '✔' or '❌'} -> "
                     f"{stream_after.drops_enabled and '✔' or '❌'})"
                 )
-                if self.can_watch(channel) and self.should_switch(channel):
-                    # ... and we can and should watch it
+                if self.should_switch(channel):
+                    # ... and we should watch it
                     self.watch(channel)
         channel.display()
 
@@ -1206,7 +1208,11 @@ class Twitch:
     async def process_notifications(self, user_id: int, message: JsonType):
         if message["type"] == "create-notification":
             data: JsonType = message["data"]["notification"]
-            if data["type"] == "user_drop_reward_reminder_notification":
+            if data["type"] in (
+                "user_drop_reward_reminder_notification",  # drop confirmation
+                "quests_viewer_reward_campaign_earned_emote",  # emote confirmation
+                # badge confirmation?
+            ):
                 self.change_state(State.INVENTORY_FETCH)
                 await self.gql_request(
                     GQL_OPERATIONS["NotificationsDelete"].with_variables(
@@ -1260,7 +1266,9 @@ class Twitch:
                 # connection problems, retry
                 if backoff.steps > 1:
                     # just so that quick retries that sometimes happen, aren't shown
-                    self.print(_("error", "no_connection").format(seconds=round(delay)))
+                    self.print(
+                        _("error", "no_connection").format(seconds=round(delay), url=str(url))
+                    )
             finally:
                 if response is not None:
                     response.release()
@@ -1307,8 +1315,8 @@ class Twitch:
                             if (
                                 single_retry
                                 and error_dict["message"] in (
-                                    "service error"
-                                    "PersistedQueryNotFound"
+                                    "service error",
+                                    "PersistedQueryNotFound",
                                 )
                             ):
                                 logger.error(
